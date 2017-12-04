@@ -9,7 +9,8 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
@@ -20,6 +21,7 @@ import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.xyzreader.R;
@@ -38,11 +40,12 @@ import java.util.GregorianCalendar;
  * touched, lead to a {@link ArticleDetailActivity} representing item details. On tablets, the
  * activity presents a grid of items as cards.
  */
-public class ArticleListActivity extends ActionBarActivity implements
+public class ArticleListActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String TAG = ArticleListActivity.class.toString();
     private Toolbar mToolbar;
+    private ActionBar mActionBar;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerView;
 
@@ -50,7 +53,9 @@ public class ArticleListActivity extends ActionBarActivity implements
     // Use default locale format
     private SimpleDateFormat outputFormat = new SimpleDateFormat();
     // Most time functions can only handle 1902 - 2037
-    private GregorianCalendar START_OF_EPOCH = new GregorianCalendar(2,1,1);
+    private GregorianCalendar START_OF_EPOCH = new GregorianCalendar(2, 1, 1);
+
+    private View mToolbarContainerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,19 +63,40 @@ public class ArticleListActivity extends ActionBarActivity implements
         setContentView(R.layout.activity_article_list);
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
+        mActionBar = getSupportActionBar();
+        mActionBar.setTitle("");
 
-
-        final View toolbarContainerView = findViewById(R.id.toolbar_container);
+        mToolbarContainerView = findViewById(R.id.toolbar_container);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        adjustRecyclerViewPadding();
         getLoaderManager().initLoader(0, null, this);
 
         if (savedInstanceState == null) {
             refresh();
         }
     }
+
+    private void adjustRecyclerViewPadding() {
+        int statusBarId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        int statusBarHeight = 0;
+        if (statusBarId>0) {
+            statusBarHeight = getResources().getDimensionPixelOffset(statusBarId);
+        }
+        TypedValue tv = new TypedValue();
+        getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true);
+        final float scale = getResources().getDisplayMetrics().density;
+        int padding_in_px = (int) (8 * scale + 0.5f);
+        int rvPaddingTop = statusBarHeight + getResources().getDimensionPixelSize(tv.resourceId) + padding_in_px;
+        int rvPaddingSides = getResources().getDimensionPixelSize(R.dimen.list_side_margin);
+        int rvPaddingBottom = getResources().getDimensionPixelSize(R.dimen.list_bottom_margin);
+        mRecyclerView.setPadding(rvPaddingSides,rvPaddingTop,rvPaddingSides,rvPaddingBottom);
+    }
+
+
 
     private void refresh() {
         startService(new Intent(this, UpdaterService.class));
@@ -181,8 +207,8 @@ public class ArticleListActivity extends ActionBarActivity implements
             } else {
                 holder.subtitleView.setText(Html.fromHtml(
                         outputFormat.format(publishedDate)
-                        + "<br/>" + " by "
-                        + mCursor.getString(ArticleLoader.Query.AUTHOR)));
+                                + "<br/>" + " by "
+                                + mCursor.getString(ArticleLoader.Query.AUTHOR)));
             }
             holder.thumbnailView.setImageUrl(
                     mCursor.getString(ArticleLoader.Query.THUMB_URL),
