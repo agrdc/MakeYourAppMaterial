@@ -34,7 +34,6 @@
             >
 
             <ImageView
-                android:tint="@color/theme_accent"
                 android:layout_gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
