@@ -15,7 +15,8 @@
         android:theme="@style/Theme.Bacon">
 
         <activity
-            android:name=".ui.ArticleListActivity">
+            android:name=".ui.ArticleListActivity"
+            android:theme="@style/Theme.Bacon">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -24,7 +25,8 @@
 
         <activity
             android:name=".ui.ArticleDetailActivity"
-            android:parentActivityName=".ui.ArticleListActivity">
+            android:parentActivityName=".ui.ArticleListActivity"
+            android:theme="@style/Theme.Bacon">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
